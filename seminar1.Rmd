@@ -29,7 +29,7 @@ output:
 # Что обсуждалось на семинаре
 - [Конспект семинара Г. Мороза](https://www.getdatajoy.com/project/564328e07882f1fa4140abb3)
 - [History семинара И. Щурова](http://pastebin.com/ieeTyxQF)
-- См. также [конспект первого занятия](http://rpubs.com/ilyaschurov/lecture1draft) прошлого года (до раздела «Теория вероятностей в R»)
+- См. также конспекты [http://math-info.hse.ru/s14/r/](курса 2014-15 учебного года) для бакалавров: [базовые возможности R](http://rpubs.com/ilyaschurov/lecture1draft) (до раздела «Теория вероятностей в R»), [работа с dataframes, гистограммы, boxplots](http://rpubs.com/ilyaschurov/lecture5). 
 
 # Домашнее задание
 ## Задача 1
