@@ -11,7 +11,7 @@ output:
   toc_depth: 4
 ---
 ```{r, echo=FALSE}
-Sys.setlocale('LC_ALL', 'ru_RU.UTF-8');
+loc <- Sys.setlocale('LC_ALL', 'C.UTF-8');
 ```
 
 # Семинар №1: базовые возможности R
