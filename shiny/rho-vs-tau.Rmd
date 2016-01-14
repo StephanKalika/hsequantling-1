@@ -1,0 +1,51 @@
+---
+title: "Связь между rho и tau"
+author: "Илья Щуров, НИУ ВШЭ"
+date: "26 November 2015"
+output: html_document
+runtime: shiny
+---
+# Связь между ранговыми коэффициентами корреляции
+В примере ниже мы генерируем $N$ датафреймов. В каждом датафрейме $K$ наблюдений и две переменные: $x$ и $y$. Переменная $x$ имеет стандартное нормальное распределение, а $y$ связана с ней по линейному закону:
+
+$$y_i = kx_i + \varepsilon_i,$$
+где $\varepsilon$ распределен по нормальному закону со средним 0 и стандартным отклонением $\sigma$. Параметры $k$ (slope) и $\sigma$ (SD of error) задаются в интерфейсе.
+
+Для каждого из датафреймов вычисляются корреляции Кенделла и Спирмена. Получается $N$ пар точек. Строится соответствующий scatter plot.
+
+Таким образом демонстриуется, что коэффициенты Кенделла и Спирмена довольно сильно скоррелированы, по крайней мере, в случае выборок из двумерного нормального распределения.
+
+```{r, echo=FALSE}
+renderUI({pageWithSidebar(
+
+
+  headerPanel("Kendell vs. Spearman"),
+sidebarPanel(
+  inputPanel(sliderInput("k", "Slope", min = -5., max = 5., value = 0, step=0.01),
+           sliderInput("eps", "SD of error", min=0., max = 5., value = 1, step=0.1),
+           sliderInput("N", "Number of samples", min=10., max = 1000., value = 500),
+           sliderInput("K", "Number of elements in the sample", min=10, max = 100, value = 20)
+)),
+mainPanel(
+  textOutput("cor"),
+  plotOutput("fig", height = 500, width = 500)
+  )
+)
+})
+
+output$fig <- renderPlot({
+  N <- input$N
+  K <- input$K
+  sp <- rep(0, N)
+  ken <- rep(0, N)
+  for (i in 1:N) {
+    x <- rnorm(K)
+    y <- input$k*x+input$eps*rnorm(K)
+    sp[i] <- cor(x,y,method='sp')
+    ken[i] <- cor(x,y, method='ke')
+  }
+  plot(sp, ken, pch=20, xlab="Spearman", ylab="Kendell", main = paste("cor(x,y) = ", as.character(cor(x,y)),", cor(rho,tau) = ",as.character(cor(sp,ken))), sep="")
+  })
+
+
+```

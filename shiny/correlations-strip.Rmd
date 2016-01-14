@@ -1,0 +1,43 @@
+---
+title: "Зависимость корреляций"
+author: "Илья Щуров, НИУ ВШЭ"
+date: "26 November 2015"
+output: html_document
+runtime: shiny
+---
+
+# Зависимость различных коэффициентов корреляции
+В этом примере мы создаем искусственные данные, для которых скаттерплот представляет собой полосу, повёрнутую на некоторый угол. Вы можете выбирать соотношение между шириной и высотой полосы и угол поворота задаётся. Затем вычисляются три коэффициента корреляции: Пирсона, Спирмена и Кенделла.
+
+```{r, echo=FALSE}
+renderUI({pageWithSidebar(
+  headerPanel("Kendell vs. Spearman"),
+  sidebarPanel(inputPanel(
+    sliderInput("angle", "Угол наклона", min = -180., max = 180., value = 0, step=1),
+    sliderInput("N","Число элементов в выборке", min = 10, max = 1000., value = 100, step=1),
+    sliderInput("q","Ширина/высота", "q", min=0, max=10, value=1, step=0.1)
+  )
+  ),
+mainPanel(
+  plotOutput("fig", height = 500, width = 500)
+  )
+)
+})
+
+output$fig <- renderPlot({
+  N <- input$N
+  q <- input$q
+  angle <- input$angle
+  
+  strip <- data.frame(x = runif(N,-1,1), y = q*runif(N,-1,1))
+  
+  angle_rad <- angle/180*pi
+  rot_matrix <- matrix(c(sin(angle_rad), cos(angle_rad), -cos(angle_rad), sin(angle_rad)),2,2)
+  new_matrix <- rot_matrix %*% t(as.matrix(strip))
+  new_df <- data.frame(t(new_matrix))
+  x <- new_df[,1]
+  y <- new_df[,2]
+  plot(new_df,xlim=c(-1.5*q,1.5*q), ylim=c(-1.5*q,1.5*q),main=sprintf("r = %f, rho = %f, tau = %f", cor(x,y), cor(x,y,method="sp"), cor(x,y,method="ke")))
+
+  })
+```
