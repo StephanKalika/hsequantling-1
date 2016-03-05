@@ -59,6 +59,7 @@ kable(gradebook[1:5, ])
 Можно нарисовать вот такую картинку:
 ```{r, echo=FALSE}
 library(ggplot2)
+library(grid)
 library(ellipse)
 theme_set(theme_gray(base_size = 18))
 pointcolor <- "#D55E00"
