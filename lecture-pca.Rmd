@@ -2,6 +2,9 @@
 title: "Лекция: Метод главных компонент"
 author: "Георгий Мороз, Ольга Ляшевская, Илья Щуров, НИУ ВШЭ"
 date: "5 марта 2016"
+output: html_document
+---
+
 output:
   knitrBootstrap::bootstrap_document:
     theme.chooser: FALSE
@@ -10,7 +13,6 @@ output:
     menu: FALSE
   toc: true
   toc_depth: 4
----
 
 ```{r, echo=F, results='hide'}
 Sys.setlocale('LC_ALL',"ru_RU.UTF-8")
@@ -54,10 +56,12 @@ incline = rnorm(250, 0, 5)
 rus = ave + incline
 math = ave - incline
 gradebook <- data.frame(rus, math)
-kable(gradebook[1:5, ])
+gradebook[1:5, ]
 ```
+
 Можно нарисовать вот такую картинку:
-```{r, echo=FALSE}
+
+```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align='center'}
 library(ggplot2)
 library(grid)
 library(ellipse)
@@ -71,6 +75,7 @@ basicplot = ggplot(gradebook)+
 basicplot + ggtitle('Рис. 1')
 
 ```
+\
 Точки распределены примерно внутри наклонённого вытянутого эллипса (так обычно устроено многомерное нормальное распределение). Мы видим, что оценки по этим двум предметам скоррелированы — среди школьников, получающих высокие баллы по математике, много тех, кто также получает высокие баллые по русскому языку, и наоборот. Тем не менее, есть и исключения. 
 
 Это наши исходные данные. Теперь предположим, что нам надо уменьшить размерность — вместо двух чисел на каждого школьника хранить только одно число. Например, мы выбираем, что записать в аттестат, и по закону это должно быть только одно число, а не два. И мы хотим в этом единственном числе закодировать как можно больше информации о школьнике. Как в этом случае поступить?
@@ -87,7 +92,7 @@ smax = max(ell_strip$math)
 ```
 С другой стороны, какая-то информация всё-таки теряется. Представьте себе, что мы знаем о школьнике только тот факт, что он сдал русский на 50 баллов. Что это говорит о его математических способностях? Если посмотреть на картинку, то мы увидим, что он может находиться в любой точке из синего отрезка — его оценка по математике в этом случае колеблется примерно между `r round(smin)` и `r round(smax)` — разброс очень большой.
 
-```{r, echo=F}
+```{r, echo=F, fig.width=5, fig.height=5, fig.align='center', fig.retina=T}
 stripcolor = "#0072B2"
 basicplot +
   geom_vline(xintercept=50, linetype=1)+
@@ -114,7 +119,7 @@ $$
 Проведём на графике прямую, соответствующую условию $PC_1=100$, то есть $rus+math=100$. Она пройдёт из левого верхнего угла в правый нижний и пересечёт наш эллипсоид по некоторому отрезку.
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align='center'}
 value = 100
 ell_strip = ell[ell$rus+ell$math > value-0.5 & ell$rus+ell$math<value+0.5, ]
 mathmin = min(ell_strip$math)
@@ -150,7 +155,7 @@ $$
 
 Что означает новая система координат геометрически? Раньше, чтобы узнать координату какой-нибудь точки, мы опускали из этой точки перпендикуляры на горизонтальную и вертикальные оси и получали таким образом её абсциссу и ординату. В новых координатах будет всё то же самое, только оси будут другие.
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, fig.width=5, fig.height=5, fig.align='center'}
 fig4 <- basicplot +
   ggtitle('Рис. 4')+
   scale_y_continuous(limits=c(20,80))+
@@ -166,13 +171,14 @@ fig4 <- basicplot +
 
 fig4
 ```
+\
 Новые оси изображены на рисунке 4. Для того, чтобы их можно было изобразить на этом рисунке, мы отказались от «школьного» требования о том, что оси пересекаются в точке $(0, 0)$. Однако, как и раньше, эти оси перпендикулярны друг другу.
 
 Проверьте, что множество точек, в которых $PC_1$ равно какой-нибудь константе (например, 120) является прямой, параллельной оси $PC_2$, и наоборот, множество точек, в которых $PC_2$ равно константе (например, 10) является прямой, параллельной оси $PC_1$.
 
 Таким образом получается новая система координат. Если мы развернём картинку таким образом, чтобы $PC_1$ стала горизонтальной осью, а $PC_2$ вертикальной, то наш эллипс «ляжет на бок», а старые координаты $math$ и $rus$ будут диагональными прямыми. Получится картинка, изображённая на рис. 4.
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.align='center'}
 attach(gradebook)
 newgrades = data.frame(PC1=math+rus, PC2=math-rus)
 detach(gradebook)
@@ -205,7 +211,7 @@ newbasic
 В нашем случае обе старые переменные вносят одинаковый вклад в $PC_1$, но эта ситуация могла бы быть и иной. Рассмотрим, например, другой датафрейм с оценками; его scatter plot изображён на рис. 6.
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align='center'}
 rus = rnorm(250, 50, 10)
 math = 35+0.3*rus + rnorm(250, 0, 4)
 gradebook <- data.frame(rus, math)
@@ -249,7 +255,7 @@ $$
 
 Нарисуем оси на картинке.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=5, fig.align='center'}
 axis <- function(basic, v1, v2, length, title) {
   basic + annotate("segment", x=crus-length*v1, y=cmath-length*v2, xend=crus + length*v1, yend=cmath + length*v2, arrow=arrow()) + annotate("text", x=crus+length*v1, y=cmath + length*v2+2, label = title, size=6)
 }
@@ -266,7 +272,8 @@ plot_with_axis + ggtitle('Рис. 6')
 Теперь переменная $rus$ вносит гораздо больший вклад в первую главную компоненту, чем переменная $math$: это видно и по картинке (ось $PC1$ почти параллельна оси $rus$), и по числам (коэффициент при $rus$ гораздо больше коэффициента при $math$).
 
 Нарисуем теперь картинку в новых координатах. 
-```{r, echo=FALSE, warning=FALSE}
+
+```{r, echo=FALSE, warning=FALSE, fig.width=5, fig.height=5, fig.align='center'}
 # FROM: http://stackoverflow.com/a/6579572/3025981
 
 PCbiplot <- function(PC, x="PC1", y="PC2") {
@@ -295,3 +302,113 @@ pca <- prcomp(gradebook)
 PCbiplot(pca) + ggtitle("Рис. 7")
 ```
 
+## Трёхмерный пример
+В примере, который мы рассматривали до сих пор, было всего две переменные. Обычно метод главных компонент применяется в том случае, когда переменных больше, чем две. Чтобы понять, как он работает в этом случае, мы рассмотрим самый простой случай: когда исходных переменных три.
+
+Начнём снова с искусственных данных. Пусть наш датафрейм теперь имеет вот такой вид.
+```{r, echo=F, warning=FALSE, message=FALSE}
+library(pracma)
+phi <- seq(-pi/2, pi/2, by=0.1)
+theta <- seq(0, 2*pi, by=0.1)
+mgrd <- meshgrid(phi, theta)
+phi <- mgrd$X
+theta <-  mgrd$Y
+scale = qnorm(1-0.01/2)
+x <- cos(phi) * cos(theta) * scale
+dim(x) <- NULL
+y <- cos(phi) * sin(theta) * scale
+dim(y) <- NULL
+z <- sin(phi) * scale
+dim(z) <- NULL
+
+sphere = as.matrix(rbind(x, y, z))
+N <- 100
+x <- rnorm(N)
+y <- rnorm(N)
+z <- rnorm(N)
+
+
+C <- t(matrix(c(4, 0, 0, 0, 2, 0, 0, 0, 1), nrow = 3))
+
+theta <- pi/4
+phi <- pi/6
+
+rot1 <- t(matrix(c(sin(theta), cos(theta), 0,
+                   cos(theta), -sin(theta), 0,
+                   0, 0, 1), nrow=3))
+
+rot2 <- t(matrix(c(1, 0, 0,
+                   0, sin(phi), cos(phi),
+                   0, cos(phi), -sin(phi)),nrow=3))
+
+rot = rot1 %*% rot2
+C <- rot %*% C
+
+points <- setNames(data.frame(t(C %*% as.matrix(rbind(x, y, z)))), c('x', 'y', 'z'))
+ell <- setNames(data.frame(t(C %*% sphere)), c('x', 'y', 'z'))
+print(points[1:5,])
+```
+В каждой строке записаны три числа. Нарисуем трёхмерный scatter plot.
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+library(plotly)
+p <- plot_ly(points, x = x, y = y, z = z, type = "scatter3d", mode = "markers") %>% layout(scene = list(aspectmode = 'data'))
+
+p 
+```
+
+По картинке видно (покрутите её!), что точки образуют вытянутое облако. По аналогии с плоским случаем, можно нарисовать эллипсоид (трёхмерный аналог эллипса), в котором лежат почти все точки.
+
+```{r}
+p <- add_trace(p, data = ell, x=x, y=y, z=z, type='mesh3d', alphahull = 0, opacity=0.4, hoverinfo='none') 
+p
+```
+
+В качестве первой главной компоненты нужно выбрать такую координату, что соответствующая координатная ось направлена вдоль того направления, вдоль которого разброс точек самый большой -- то есть вдоль длинной оси эллипсоида.
+```{r}
+
+arrow_profile <- function(len, width=0.2, headlength=2, headwidth=0.5, step=0.1) {
+  #returns list of X's and Y's
+  #Y=f(X)
+  # the graph of Y is an arrow profile
+  X <- c(seq(-len, len-headlength, by=step),
+         len-headlength,
+         seq(len-headlength+1E-5, len, by=step))
+  Y <- rep(width, length(X))
+  for (i in 1:length(X)) {
+    if (X[i] == len-headlength) {
+      Y[i]=headwidth/2
+    }
+    if (X[i] > len-headlength) {
+      Y[i] = (len - X[i])*headwidth/(headlength)
+    }
+  }
+  list(X=X, Y=Y)
+}
+
+rotate <- function(profile, thetastep=0.1) {
+  # rotate profile Y = f(X) around X axes
+  X <- profile$X
+  Y <- profile$Y
+  Theta <- seq(0, 2*pi, by=thetastep)
+  dummy <- rep(0, length(Theta)*length(X))
+  out <- data.frame(x = dummy, y = dummy, z = dummy)
+  j <- 0
+  for (i in 1:length(X)) {
+    for (th in Theta) {
+      j <- j + 1
+      out[j, ] <- c(X[i], Y[i]*cos(th), Y[i]*sin(th))
+    }
+  }
+  out
+}
+arrow3d <- function(V, headlength=0.1, headwidth=0.05, step=0.01) {
+  # returns arrow surface with pivot point zero
+  # pivot in the center
+  # end of arrow is end of vector V
+  len <-norm(V, type='2')
+}
+
+p <- add_trace(p, data = rotate(arrow_profile(5)), x=x, y=y, z=z, type='scatter3d',  opacity=0.4, hoverinfo='none') 
+p
+```
