@@ -1,0 +1,176 @@
+---
+title: "Plotly 3D Testcase"
+author: "Ilya V. Schurov"
+date: "5 марта 2016"
+output: html_document
+---
+
+```{r}
+library(pracma)
+phi <- seq(-pi/2, pi/2, by=0.1)
+theta <- seq(0, 2*pi, by=0.1)
+mgrd <- meshgrid(phi, theta)
+phi <- mgrd$X
+theta <-  mgrd$Y
+scale = qnorm(1-0.01/2)
+x <- cos(phi) * cos(theta) * scale
+dim(x) <- NULL
+y <- cos(phi) * sin(theta) * scale
+dim(y) <- NULL
+z <- sin(phi) * scale
+dim(z) <- NULL
+
+sphere = as.matrix(rbind(x, y, z))
+N <- 100
+x <- rnorm(N)
+y <- rnorm(N)
+z <- rnorm(N)
+
+
+C <- t(matrix(c(4, 0, 0, 0, 2, 0, 0, 0, 1), nrow = 3))
+
+theta <- pi/4
+phi <- pi/6
+
+rot1 <- t(matrix(c(sin(theta), cos(theta), 0,
+                   cos(theta), -sin(theta), 0,
+                   0, 0, 1), nrow=3))
+
+rot2 <- t(matrix(c(1, 0, 0,
+                   0, sin(phi), cos(phi),
+                   0, cos(phi), -sin(phi)),nrow=3))
+
+rot = rot1 %*% rot2
+C <- rot %*% C
+
+points <- setNames(data.frame(t(C %*% as.matrix(rbind(x, y, z)))), c('x', 'y', 'z'))
+ell <- setNames(data.frame(t(C %*% sphere)), c('x', 'y', 'z'))
+print(points[1:5,])
+```
+
+```{r}
+library(plotly)
+p <- plot_ly(points, x = x, y = y, z = z, type = "scatter3d", mode = "markers") %>% layout(scene = list(aspectmode = 'data'))
+
+p 
+```
+
+```{r}
+p <- add_trace(p, data = ell, x=x, y=y, z=z, type='mesh3d', alphahull = 0, opacity=0.4, hoverinfo='none') 
+p
+```
+
+```{r}
+arrow_profile <- function(len, width=0.2, headlength=2, headwidth=0.5, steps=50) {
+  #returns list of X's and Y's
+  #Y=f(X)
+  # the graph of Y is an arrow profile
+  X <- c(-len, seq(-len, len-headlength, length.out = steps %/% 2),
+         len-headlength,
+         seq(len-headlength+1E-5, len, length.out = steps %/% 2))
+  Y <- c(0, rep(width, length(X)-1))
+  for (i in 1:length(X)) {
+    if (X[i] > len-headlength) {
+      Y[i] = (len - X[i])*headwidth/(headlength)
+    }
+  }
+  list(X=X, Y=Y)
+}
+
+rotate <- function(profile, thetasteps=50) {
+  # rotate profile Y = f(X) around X axes
+  X <- profile$X
+  R <- profile$Y
+  Theta <- seq(0, 2*pi+2*pi/thetasteps, length.out = thetasteps)
+  mgrd <- meshgrid(X, Theta)
+  X <- mgrd$X
+  R <- meshgrid(R, Theta)$X
+  Theta <- mgrd$Y
+  Y <- R*cos(Theta)
+  Z <- R*sin(Theta)
+  list(x=X, y=Y, z=Z)
+}
+
+apply_matrix <- function(C, points) {
+  x <- points$x
+  y <- points$y
+  z <- points$z
+  n <- nrow(x)
+  m <- ncol(x)
+  outx <- matrix(rep(0, n*m), nrow = n)
+  outy <- matrix(rep(0, n*m), nrow = n)
+  outz <- matrix(rep(0, n*m), nrow = n)
+  
+  for (i in 1:nrow(x)) {
+    for (j in 1:ncol(x)) {
+      out <- C %*% c(x[i, j], y[i, j], z[i, j])
+      outx[i,j] <- out[1,]
+      outy[i,j] <- out[2,]
+      outz[i,j] <- out[3,]
+    }
+  }
+  list(x=outx,y=outy,z=outz)
+}
+
+p <- add_trace(p, data = apply_matrix(rot,rotate(arrow_profile(14))), x=x, y=y, z=z, type='surface', hoverinfo='none', showscale=F, colorscale=list(list(0, "#009E73"), list(1, "#009E73")))
+p
+```
+
+```{r}
+scale = 2
+project_along_PC1 <- list(camera=list(eye=list(x=rot[1,1]*scale, y=rot[2,1]*scale, z=rot[3,1]*scale)))
+                       
+                       
+p %>% layout(scene=project_along_PC1)
+```
+
+
+```{r, echo=F, warning=F, message=FALSE}
+
+swap_matrix=matrix(c(0, 1, 0, 1, 0, 0, 0, 0, 1),
+                   nrow=3,
+                   byrow=T)
+p <- add_trace(p, 
+               data = apply_matrix(
+                 rot %*% swap_matrix,
+                 rotate(arrow_profile(10))), 
+               x=x, y=y, z=z, type='surface',
+               hoverinfo='none', 
+               showscale=F,
+               colorscale=list(list(0, "#D55E00"), list(1, "#D55E00")))
+swap_matrix=matrix(c(0, 0, 1, 1, 0, 0, 0, 1, 0),
+                   nrow=3,
+                   byrow=F)
+p <- add_trace(p, 
+               data = apply_matrix(
+                 rot %*% swap_matrix,
+                 rotate(arrow_profile(6))), 
+               x=x, y=y, z=z, type='surface',
+               hoverinfo='none', 
+               showscale=F,
+               colorscale=list(list(0, "#CC79A7"), list(1, "#CC79A7")))
+
+p %>% layout(scene=project_along_PC1)
+```
+
+```{r}
+p
+```
+
+
+```{r}
+p %>% layout(
+  scene=list(
+    camera=list(
+      eye=list(
+        x=rot[1,3]*scale,
+        y=rot[2,3]*scale,
+        z=rot[3,3]*scale),
+      up=list(
+        x=rot[1,2],
+        y=rot[2,2],
+        z=rot[3,2])
+      )
+    )
+  )
+```
