@@ -6,29 +6,29 @@ output: html_document
 
 ---
 
-output:
-  knitrBootstrap::bootstrap_document:
-    theme.chooser: FALSE
-    highlight.chooser: FALSE
-    highlight: Xcode
-    menu: FALSE
-  toc: true
-  toc_depth: 4
-  
 
-
-
-```{r setup}
+```{r setup, echo=FALSE, message=FALSE}
 library(knitr)
 library(rgl)
 knit_hooks$set(webgl = hook_webgl)
-```
-
-```{r, echo=F, results='hide'}
 Sys.setlocale('LC_ALL',"ru_RU.UTF-8")
 set.seed(124)
 ```
+
 # Лекция: Метод главных компонент
+
+*Георгий Мороз, Ольга Ляшевская, Илья Щуров*
+
+Курс «Анализ лингвистических данных: квантитативные методы и визуализация».
+
+Школа лингвистики НИУ ВШЭ, магистерская программа «Теория языка и компьютерная лингвистика», 2015-16 учебный год.
+
+[Школа лингвистики](http://ling.hse.ru/) | [Все материалы курса](http://hsequantling.wikispaces.com/) | [Исходные коды на Github](https://github.com/ischurov/hsequantling)
+
+<span style='font-size:80%'>Данный материал доступен под лицензией [CC BY-SA
+4.0](https://creativecommons.org/licenses/by-sa/4.0/). При использовании обязательно упоминание авторов курса и аффилиации. При наличии технической возможности необходимо также указать активную гиперссылку на [страницу курса](http://hsequantling.wikispaces.com/).<span>
+
+---
 
 ## Постановка задачи
 
